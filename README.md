@@ -27,3 +27,8 @@
    - RedisInsight
    - ApiService
    - WebFrontend
+
+## Пример работы приложения
+<img width="1280" height="621" alt="image" src="https://github.com/user-attachments/assets/e37e467e-7436-438f-9879-e3f9f6e275cb" />
+<img width="1280" height="275" alt="image" src="https://github.com/user-attachments/assets/a3d191bf-bf2d-454f-b212-c3efd56c92f9" />
+<img width="1280" height="617" alt="image" src="https://github.com/user-attachments/assets/bf52b22e-c1f6-4d63-8d7f-a63237935e01" />
