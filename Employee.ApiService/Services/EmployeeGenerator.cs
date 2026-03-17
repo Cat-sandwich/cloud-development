@@ -6,7 +6,7 @@ namespace Employee.ApiService.Services;
 /// <summary>
 /// Генератор тестовых сотрудников
 /// </summary>
-public class EmployeeGenerator
+public static class EmployeeGenerator
 {
     /// <summary>
     /// Справочник профессий
@@ -104,7 +104,7 @@ public class EmployeeGenerator
     /// <summary>
     /// Генерация сотрудника
     /// </summary>
-    public EmployeeModel Generate(int id)
+    public static EmployeeModel Generate(int id)
     {
         var employee = _faker.Generate();
         employee.Id = id;

@@ -7,21 +7,19 @@ namespace Employee.ApiService.Services;
 /// <summary>
 /// Сервис получения сотрудников
 /// </summary>
-/// <param name="_cache">кэш</param>
-/// <param name="_configuration">конфигурация</param>
-/// <param name="_logger">логирование</param>
-/// <param name="_generator">генератор</param>
+/// <param name="cache">кэш</param>
+/// <param name="configuration">конфигурация</param>
+/// <param name="logger">логирование</param>
 public class EmployeeService(
-    IDistributedCache _cache,
-    IConfiguration _configuration,
-    ILogger<EmployeeService> _logger,
-    EmployeeGenerator _generator)
+    IDistributedCache cache,
+    IConfiguration configuration,
+    ILogger<EmployeeService> logger)
 {
     /// <summary>
     /// Время жизни записи в кэше
     /// </summary>
     private readonly TimeSpan _cacheExpiration =
-        TimeSpan.FromMinutes(_configuration.GetValue("CacheSettings:ExpirationMinutes", 5));
+        TimeSpan.FromMinutes(configuration.GetValue("CacheSettings:ExpirationMinutes", 5));
 
     /// <summary>
     /// Получение сотрудника по id
@@ -32,9 +30,9 @@ public class EmployeeService(
     {
         var cacheKey = $"employee:{id}";
 
-        _logger.LogInformation("Попытка получить сотрудника {EmployeeId} из кэша", id);
+        logger.LogInformation("Попытка получить сотрудника {EmployeeId} из кэша", id);
 
-        var cachedData = await _cache.GetStringAsync(cacheKey);
+        var cachedData = await cache.GetStringAsync(cacheKey);
 
         if (!string.IsNullOrEmpty(cachedData))
         {
@@ -44,21 +42,21 @@ public class EmployeeService(
 
                 if (cachedEmployee != null)
                 {
-                    _logger.LogInformation("Сотрудник {EmployeeId} получен из кэша", id);
+                    logger.LogInformation("Сотрудник {EmployeeId} получен из кэша", id);
                     return cachedEmployee;
                 }
 
-                _logger.LogWarning("Сотрудник {EmployeeId} найден в кэше, но десериализация вернула null", id);
+                logger.LogWarning("Сотрудник {EmployeeId} найден в кэше, но десериализация вернула null", id);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка десериализации сотрудника {EmployeeId}", id);
+                logger.LogError(ex, "Ошибка десериализации сотрудника {EmployeeId}", id);
             }
         }
 
-        _logger.LogInformation("Сотрудник {EmployeeId} отсутствует в кэше. Генерация нового", id);
+        logger.LogInformation("Сотрудник {EmployeeId} отсутствует в кэше. Генерация нового", id);
 
-        var employee = _generator.Generate(id);
+        var employee = EmployeeGenerator.Generate(id);
 
         try
         {
@@ -67,17 +65,17 @@ public class EmployeeService(
                 AbsoluteExpirationRelativeToNow = _cacheExpiration
             };
 
-            await _cache.SetStringAsync(
+            await cache.SetStringAsync(
                 cacheKey,
                 JsonSerializer.Serialize(employee),
                 cacheOptions
             );
 
-            _logger.LogInformation("Сотрудник {EmployeeId} сохранён в кэш", id);
+            logger.LogInformation("Сотрудник {EmployeeId} сохранён в кэш", id);
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Не удалось сохранить сотрудника {EmployeeId} в кэш", id);
+            logger.LogWarning(ex, "Не удалось сохранить сотрудника {EmployeeId} в кэш", id);
         }
 
         return employee;
