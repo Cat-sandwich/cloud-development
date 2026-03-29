@@ -30,7 +30,7 @@ public class EmployeeService(
     {
         var cacheKey = $"employee:{id}";
 
-        logger.LogInformation("Попытка получить сотрудника {EmployeeId} из кэша", id);
+        logger.LogInformation("Attempting to retrieve employee {EmployeeId} from cache", id);
 
         var cachedData = await cache.GetStringAsync(cacheKey);
 
@@ -42,19 +42,19 @@ public class EmployeeService(
 
                 if (cachedEmployee != null)
                 {
-                    logger.LogInformation("Сотрудник {EmployeeId} получен из кэша", id);
+                    logger.LogInformation("Employee {EmployeeId} retrieved from cache", id);
                     return cachedEmployee;
                 }
 
-                logger.LogWarning("Сотрудник {EmployeeId} найден в кэше, но десериализация вернула null", id);
+                logger.LogWarning("Employee {EmployeeId} found in cache, but deserialization returned null", id);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Ошибка десериализации сотрудника {EmployeeId}", id);
+                logger.LogError(ex, "Error deserializing employee {EmployeeId}", id);
             }
         }
 
-        logger.LogInformation("Сотрудник {EmployeeId} отсутствует в кэше. Генерация нового", id);
+        logger.LogInformation("Employee {EmployeeId} not found in cache. Generating new one", id);
 
         var employee = EmployeeGenerator.Generate(id);
 
@@ -71,11 +71,11 @@ public class EmployeeService(
                 cacheOptions
             );
 
-            logger.LogInformation("Сотрудник {EmployeeId} сохранён в кэш", id);
+            logger.LogInformation("Employee {EmployeeId} saved to cache", id);
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Не удалось сохранить сотрудника {EmployeeId} в кэш", id);
+            logger.LogWarning(ex, "Failed to save employee {EmployeeId} to cache", id);
         }
 
         return employee;
