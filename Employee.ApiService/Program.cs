@@ -16,15 +16,6 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(xmlPath);
 });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("wasm", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
 
 builder.Services.AddScoped<EmployeeService>();
 
@@ -38,7 +29,6 @@ if (app.Environment.IsDevelopment())
 
 app.MapDefaultEndpoints();
 app.UseHttpsRedirection();
-app.UseCors("wasm");
 app.UseRouting();
 app.MapGet("/api/employee", async (int id, EmployeeService service) =>
 {
