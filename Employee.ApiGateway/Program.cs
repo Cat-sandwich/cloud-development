@@ -28,10 +28,21 @@ for (var i = 0; i < generators.Length; i++)
         $"Routes:0:DownstreamHostAndPorts:{i}:Port", uri.Port.ToString()));
 }
 
-if (overrides.Any())
+if (overrides.Count != 0)
 {
     builder.Configuration.AddInMemoryCollection(overrides);
 }
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowClient", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
 builder.Services
     .AddOcelot(builder.Configuration)
@@ -39,6 +50,8 @@ builder.Services
         new QueryBasedLoadBalancer(sp));
 
 var app = builder.Build();
+
+app.UseCors("AllowClient");
 
 await app.UseOcelot();
 await app.RunAsync();

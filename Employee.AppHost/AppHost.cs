@@ -4,23 +4,18 @@ var redis = builder
     .AddRedis("redis")
     .WithRedisCommander();
 
-var generators = new List<IResourceBuilder<ProjectResource>>();
+var apiGateway = builder
+    .AddProject<Projects.Employee_ApiGateway>("employee-apigateway")
+    .WithHttpEndpoint(name: "gateway", port: 5200);
 
 for (var i = 1; i <= 3; i++)
 {
     var generator = builder
         .AddProject<Projects.Employee_ApiService>($"generator-{i}")
         .WithReference(redis)
+        .WaitFor(redis)
         .WithHttpEndpoint(name: $"http{i}", port: 5200 + i);
 
-    generators.Add(generator);
-}
-
-var apiGateway = builder.AddProject<Projects.Employee_ApiGateway>("employee-apigateway")
-    .WithHttpEndpoint(name: "gateway", port: 5200);
-
-foreach (var generator in generators)
-{
     apiGateway
         .WithReference(generator)
         .WaitFor(generator);
