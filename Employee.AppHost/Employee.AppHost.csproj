@@ -14,10 +14,12 @@
     <ProjectReference Include="..\Client.Wasm\Client.Wasm.csproj" />
     <ProjectReference Include="..\Employee.ApiGateway\Employee.ApiGateway.csproj" />
     <ProjectReference Include="..\Employee.ApiService\Employee.ApiService.csproj" />
+    <ProjectReference Include="..\Employee.FileService\Employee.FileService.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="13.1.2" />
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="13.3.1" />
+    <PackageReference Include="Aspire.Hosting.AWS" Version="13.0.2" />
     <PackageReference Include="Aspire.Hosting.Redis" Version="13.1.2" />
   </ItemGroup>
 

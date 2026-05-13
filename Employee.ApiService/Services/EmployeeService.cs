@@ -10,10 +10,12 @@ namespace Employee.ApiService.Services;
 /// <param name="cache">кэш</param>
 /// <param name="configuration">конфигурация</param>
 /// <param name="logger">логирование</param>
+/// <param name="sqsPublisher">сервис отправки сотрудников в SQS</param>
 public class EmployeeService(
     IDistributedCache cache,
     IConfiguration configuration,
-    ILogger<EmployeeService> logger)
+    ILogger<EmployeeService> logger,
+    SqsPublisherService sqsPublisher)
 {
     /// <summary>
     /// Время жизни записи в кэше
@@ -25,7 +27,7 @@ public class EmployeeService(
     /// Получение сотрудника по id
     /// </summary>
     /// <param name="id">идентификатор</param>
-    /// <returns></returns>
+    /// <returns>данные сотрудника</returns>
     public async Task<EmployeeModel> GetEmployeeAsync(int id)
     {
         var cacheKey = $"employee:{id}";
@@ -57,6 +59,17 @@ public class EmployeeService(
         logger.LogInformation("Employee {EmployeeId} not found in cache. Generating new one", id);
 
         var employee = EmployeeGenerator.Generate(id);
+
+        try
+        {
+            await sqsPublisher.PublishAsync(employee);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex,
+                "Failed to publish employee {EmployeeId}",
+                id);
+        }
 
         try
         {

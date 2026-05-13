@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" Version="4.0.23" />
+    <PackageReference Include="AWSSDK.SQS" Version="4.0.2.28" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Employee.ApiService\Employee.ApiService.csproj" />
+    <ProjectReference Include="..\Employee.ServiceDefaults\Employee.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>
