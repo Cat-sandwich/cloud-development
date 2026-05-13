@@ -1,6 +1,6 @@
 ## Описание проекта
 
-Проект представляет собой распределённую систему для получения информации о сотрудниках с использованием кэширования Redis и балансировки нагрузки по алгоритму Query Based.
+Проект представляет собой распределённую систему для получения информации о сотрудниках с использованием кэширования Redis и балансировки нагрузки по алгоритму Query Based, а также используются очереди сообщений и объектное хранилище.
 
 ## Архитектура проекта
 
@@ -8,6 +8,7 @@
 
 - **Employee.ApiService** – Web API сервис
 - **Employee.ApiGateway** – API Gateway на базе Ocelot
+- **Employee.FileService** – сервис обработки сообщений и сохранения файлов
 - **Employee.AppHost** – Aspire orchestrator
 - **Employee.ServiceDefaults** – общие настройки сервисов
 - **Client.Wasm** – клиент
@@ -18,9 +19,13 @@
 2. API Gateway (Ocelot) принимает запрос и передаёт его в один из сервисов генерации.
 3. Выбор сервиса осуществляется с помощью кастомного балансировщика `QueryBasedLoadBalancer`.
 4. Сервис:
-   - проверяет наличие данных в Redis,
-   - если данные есть — возвращает их из кэша,
-   - если нет — генерирует нового сотрудника и сохраняет его в кэш.
+   - проверяет наличие сотрудника в Redis,
+   - при отсутствии данных генерирует нового сотрудника,
+   - сохраняет данные в Redis,
+   - отправляет сообщение в очередь SQS.
+5. `Employee.FileService` получает сообщение из очереди.
+6. Данные сотрудника сериализуются в JSON-файл.
+7. Файл сохраняется в S3-хранилище LocalStack.
   
 ## Оркестрация сервисов
 
@@ -35,14 +40,21 @@
 1. Запустить проект **Employee.AppHost**.
 2. Aspire Dashboard откроется автоматически.
 3. В Dashboard будут запущены:
+   - Localstack
    - Redis
    - Redis Commander
    - 3 реплики Employee.ApiService
    - API Gateway
+   - Employee.FileService
    - WebFrontend
-   - 
+   
 ## Пример работы приложения
-<img width="1904" height="913" alt="image" src="https://github.com/user-attachments/assets/3c315a88-cd29-4184-8412-289d66aa3bf7" />
-<img width="1849" height="710" alt="image" src="https://github.com/user-attachments/assets/ecf07da2-9cdf-4ad3-a2b3-6802464702c9" />
+<img width="1580" height="895" alt="image" src="https://github.com/user-attachments/assets/b318b6f5-6cf0-4806-8aee-a31d3865b2ab" />
+<img width="1474" height="903" alt="image" src="https://github.com/user-attachments/assets/f481685b-e63a-46fa-9364-a1635c6a84b5" />
+<img width="1086" height="124" alt="image" src="https://github.com/user-attachments/assets/efff9ebe-d106-46fe-a3ba-e89a08ab6681" />
+<img width="1122" height="303" alt="image" src="https://github.com/user-attachments/assets/d2f252a1-630e-47f1-81f3-d91a76cc3b56" />
+
+
+
 
 
