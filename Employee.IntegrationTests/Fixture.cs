@@ -58,6 +58,14 @@ public class Fixture : IAsyncLifetime
 
     public async Task DisposeAsync()  
     {
+        GatewayClient?.Dispose();
+        FileServiceClient?.Dispose();
+        S3Client?.Dispose();
+
+        if (App is not null)
+        {
+            await App.DisposeAsync();
+        }
     }
 
     public async Task<List<S3Object>> WaitForS3ObjectAsync(string key)

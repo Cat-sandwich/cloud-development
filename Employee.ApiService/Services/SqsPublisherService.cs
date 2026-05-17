@@ -13,7 +13,19 @@ public class SqsPublisherService(
     IAmazonSQS sqs,
     ILogger<SqsPublisherService> logger)
 {
-    private const string QueueName = "employee-queue";
+    /// <summary>
+    /// Настройки сериализации JSON для отправки сообщений в очередь
+    /// </summary>
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        WriteIndented = true
+    };
+
+    /// <summary>
+    /// URL очереди SQS, кешируемый после первого успешного получения
+    /// </summary>
+    private string? _queueUrl;
 
     /// <summary>
     /// Отправка сотрудника в SQS очеред
@@ -21,36 +33,28 @@ public class SqsPublisherService(
     /// <param name="employee">данные сотрудника</param>
     public async Task PublishAsync(EmployeeModel employee)
     {
-        var queueUrl = string.Empty;
-
-        while (true)
+        if(_queueUrl is null)
         {
-            try
+            while (true)
             {
-                var response = await sqs.GetQueueUrlAsync("employee-queue");
-
-                queueUrl = response.QueueUrl;
-
-                break;
-            }
-            catch
-            {
-                logger.LogInformation("Waiting for SQS queue...");
-                await Task.Delay(2000);
+                try
+                {
+                    _queueUrl = (await sqs.GetQueueUrlAsync("employee-queue")).QueueUrl;
+                    break;
+                }
+                catch
+                {
+                    logger.LogInformation("Waiting for SQS queue...");
+                    await Task.Delay(2000);
+                }
             }
         }
 
-        var json = JsonSerializer.Serialize(
-            employee,
-            new JsonSerializerOptions
-            {
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                WriteIndented = true
-            });
+        var json = JsonSerializer.Serialize(employee, _jsonOptions);
 
         await sqs.SendMessageAsync(new SendMessageRequest
         {
-            QueueUrl = queueUrl,
+            QueueUrl = _queueUrl,
             MessageBody = json
         });
 
